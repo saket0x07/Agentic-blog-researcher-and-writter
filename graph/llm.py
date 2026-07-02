@@ -11,7 +11,7 @@ def get_llm() -> ChatOpenAI:
         return ChatOpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=config.OPENROUTER_API_KEY,
-            model="openai/gpt-4o-mini"
+            model="openai/gpt-oss-120b:free"
         )
     elif config.OPENAI_API_KEY:
         return ChatOpenAI(

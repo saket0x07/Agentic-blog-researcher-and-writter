@@ -102,9 +102,12 @@ def reducer_node(state: OverallState):
                 image_filename = f"{title_slug}_img_{sec_id}_{i}.png"
                 image_path = config.IMAGE_DIR / image_filename
                 
+                # Clean prompt of any weird control/non-breaking space characters
+                clean_prompt = img_item.prompt.replace('\xa0', ' ').replace('\u200b', '').replace('\r', '').strip()
+                
                 img_meta = {
                     "section_id": img_item.section_id,
-                    "prompt": img_item.prompt,
+                    "prompt": clean_prompt,
                     "caption": img_item.caption,
                     "image_path": str(image_path),
                     "success": False
@@ -112,7 +115,7 @@ def reducer_node(state: OverallState):
                 
                 try:
                     # Run image generator
-                    saved_path = generate_image(img_item.prompt, image_path)
+                    saved_path = generate_image(clean_prompt, image_path)
                     img_meta["image_path"] = str(saved_path)
                     img_meta["success"] = True
                     
@@ -128,6 +131,10 @@ def reducer_node(state: OverallState):
                     print(f"[Reducer Node] Failed to process image for {sec_id}: {ex}")
                 
                 local_image_prompts.append(img_meta)
+                
+                # Sleep briefly to avoid rate limits on sequential image generations
+                import time
+                time.sleep(3)
                     
     # Write final markdown to output
     final_blog_path = config.OUTPUT_DIR / f"{title_slug}_blog.md"
