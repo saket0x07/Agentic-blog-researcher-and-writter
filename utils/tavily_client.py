@@ -47,3 +47,42 @@ def search_tavily(query: str, max_results: int = 5) -> List[Dict[str, Any]]:
                 "date": "2026-06-30"
             }
         ]
+
+def search_images_tavily(query: str, max_results: int = 3) -> List[Dict[str, Any]]:
+    """
+    Search Tavily for images matching the query.
+    Returns a list of dicts, each with keys: 'url' (image URL) and 'source_url' (original website).
+    """
+    api_key = config.TAVILY_API_KEY
+    if not api_key:
+        logger.warning("TAVILY_API_KEY not found. Returning mock image search results.")
+        return [
+            {
+                "url": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+                "source_url": "https://unsplash.com/photos/blue-and-black-circuit-board-f77Bh3inUpE",
+                "description": "Mock electronics circuit board image"
+            }
+        ]
+    
+    try:
+        client = TavilyClient(api_key=api_key)
+        # Search with include_images=True
+        response = client.search(query=query, max_results=max_results, include_images=True)
+        images = response.get("images", [])
+        
+        image_results = []
+        for img in images:
+            if isinstance(img, str):
+                image_results.append({
+                    "url": img,
+                    "source_url": response.get("results", [{}])[0].get("url", "https://tavily.com")
+                })
+            elif isinstance(img, dict):
+                image_results.append({
+                    "url": img.get("url", ""),
+                    "source_url": img.get("source_url") or response.get("results", [{}])[0].get("url", "https://tavily.com")
+                })
+        return image_results
+    except Exception as e:
+        logger.error(f"Error during Tavily image search: {e}")
+        return []

@@ -101,5 +101,35 @@ class TestImageGeneratorPipeline(unittest.TestCase):
         except Exception as e:
             self.fail(f"Real FLUX generation failed: {e}")
 
+    @patch("blog_agent.utils.image_generator.search_images_tavily")
+    @patch("blog_agent.utils.image_generator.requests.get")
+    def test_fetch_web_image_success(self, mock_requests_get, mock_search_images):
+        # 1. Setup mock search results
+        mock_search_images.return_value = [
+            {"url": "https://example.com/image1.png", "source_url": "https://example.com/source1"}
+        ]
+        
+        # 2. Setup mock response from requests (valid dynamically generated PNG bytes)
+        from io import BytesIO
+        img = Image.new('RGB', (1, 1), color='red')
+        buf = BytesIO()
+        img.save(buf, format='PNG')
+        tiny_png = buf.getvalue()
+        
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.headers = {"Content-Type": "image/png"}
+        mock_response.content = tiny_png
+        mock_requests_get.return_value = mock_response
+        
+        # 3. Act
+        from blog_agent.utils.image_generator import fetch_web_image
+        result = fetch_web_image("A beautiful data visualization diagram", self.output_path)
+        
+        # 4. Assert
+        self.assertEqual(result["image_path"], str(self.output_path))
+        self.assertEqual(result["source_url"], "https://example.com/source1")
+        self.assertTrue(self.output_path.exists())
+
 if __name__ == "__main__":
     unittest.main()

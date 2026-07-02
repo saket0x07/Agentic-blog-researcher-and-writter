@@ -6,8 +6,8 @@ from PIL import Image
 from blog_agent import config
 
 logger = logging.getLogger(__name__)
-# HF_MODEL="black-forest-labs/FLUX.1-schnell"
-HF_MODEL="stabilityai/stable-diffusion-3.5-medium"
+HF_MODEL="black-forest-labs/FLUX.1-schnell"
+# HF_MODEL="stabilityai/stable-diffusion-3.5-medium"
 def generate_with_huggingface(prompt: str, output_path: Path) -> Path:
     """ 
     Generate sn image using hugging face inference  API.

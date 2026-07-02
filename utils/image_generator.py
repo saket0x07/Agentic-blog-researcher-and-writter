@@ -1,9 +1,11 @@
 import logging
+import requests
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 from blog_agent.utils.gemini_client import generate_blog_image
 from blog_agent.utils.huggingface_client import generate_with_huggingface
+from blog_agent.utils.tavily_client import search_images_tavily
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +110,63 @@ def generate_image(prompt: str, output_path: Path) -> Path:
     except Exception as e:
         logger.error(f"All image generation methods failed: {e}")
         raise e
+
+def fetch_web_image(prompt: str, output_path: Path) -> dict:
+    """
+    Search for a matching image on the web using Tavily image search,
+    download the first successfully fetched image, and save it locally.
+    
+    Returns:
+        dict with keys: 'image_path' (str) and 'source_url' (str for credit).
+    Raises:
+        Exception: if search returns no images or download fails.
+    """
+    logger.info(f"Searching web for image matching prompt: {prompt}")
+    # Run image search
+    results = search_images_tavily(prompt, max_results=5)
+    if not results:
+        raise ValueError(f"No web images found for prompt: '{prompt}'")
+    
+    # Try downloading the retrieved images in order of relevance
+    last_error = None
+    for res in results:
+        img_url = res.get("url")
+        source_url = res.get("source_url")
+        if not img_url:
+            continue
+        
+        try:
+            logger.info(f"Attempting to download image: {img_url}")
+            response = requests.get(
+                img_url, 
+                timeout=10, 
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+            )
+            if response.status_code == 200:
+                content_type = response.headers.get("Content-Type", "")
+                if "image" in content_type or any(img_url.lower().endswith(ext) for ext in ['.png', '.jpg', '.jpeg', '.webp', '.gif']):
+                    output_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(output_path, "wb") as f:
+                        f.write(response.content)
+                    
+                    # Verify it's a valid image that PIL can open
+                    with Image.open(output_path) as test_img:
+                        test_img.verify()
+                        
+                    logger.info(f"Successfully downloaded and verified web image from {img_url}")
+                    return {
+                        "image_path": str(output_path),
+                        "source_url": source_url
+                    }
+                else:
+                    logger.warning(f"Downloaded content from {img_url} is not a valid image content type: {content_type}")
+            else:
+                logger.warning(f"Failed to download image from {img_url} (HTTP status code {response.status_code})")
+        except Exception as e:
+            logger.warning(f"Failed to download or verify image from {img_url}: {e}")
+            last_error = e
+            
+    raise last_error or RuntimeError(f"Failed to download any of the {len(results)} found web images for prompt: '{prompt}'")
 
     
     

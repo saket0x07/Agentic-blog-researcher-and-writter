@@ -42,4 +42,6 @@ class OverallState(TypedDict):
     section_drafts: Annotated[List[Dict[str, Any]], operator.add] # Section inputs gathered from Worker Nodes
     final_blog: str                                # The finalized blog markdown text
     images: List[str]                              # List of generated local image paths
-    image_prompts: List[Dict[str, Any]]            # Prompts and metadata for generated images
+    image_prompts: List[Dict[str, Any]]  
+    image_choices: List[Dict[str, Any]]            # User-selected interactive image options (mode, prompt, caption, section_id)
+
