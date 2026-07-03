@@ -111,6 +111,62 @@ def generate_image(prompt: str, output_path: Path) -> Path:
         logger.error(f"All image generation methods failed: {e}")
         raise e
 
+def generate_flux_image(prompt: str, output_path: Path) -> Path:
+    """
+    Generate an image using Hugging Face FLUX directly.
+    If it fails, fallback to Pillow placeholder generation.
+    """
+    try:
+        logger.info("Attempting image generation using Hugging Face FLUX...")
+        result = generate_with_huggingface(prompt, output_path)
+        if result and Path(result).exists():
+            return Path(result)
+        logger.warning("Hugging Face did not return a valid image path. Trying Pillow fallback...")
+    except Exception as e:
+        logger.warning(f"Hugging Face image generation failed: {e}. Trying Pillow fallback...")
+
+    # Fallback to Pillow
+    try:
+        logger.info("Attempting image generation using Pillow placeholder...")
+        return generate_with_pillow(prompt, output_path)
+    except Exception as e:
+        logger.error(f"All direct FLUX image generation methods failed: {e}")
+        raise e
+
+def clean_and_shorten_query(query: str) -> str:
+    """
+    Extracts 4-5 core keywords from a long image prompt or query
+    to create a general keyword search query that Tavily can resolve.
+    """
+    import re
+    # 1. Strip out punctuation/quotes to get clean words
+    cleaned_text = re.sub(r"[^\w\s-]", " ", query)
+    words = cleaned_text.strip().split()
+    
+    if len(words) <= 6:
+        return " ".join(words)
+        
+    # Remove common diagram/style/filler words
+    fillers = {
+        "clean", "vector", "illustration", "of", "the", "and", "a", "an", "showing", 
+        "with", "for", "in", "on", "at", "by", "style", "consistent", "iconography", 
+        "minimalist", "professional", "diagram", "diagrams", "illustrations", 
+        "graphics", "graphic", "modern", "design", "background", "whitespace", 
+        "color", "tech", "corporate", "simple", "flat", "art", "left", "right", 
+        "panel", "middle", "flow", "step", "framework", "side", "to", "first",
+        "second", "third", "figure", "photo", "image", "concept", "conceptual"
+    }
+    
+    filtered_words = []
+    for w in words:
+        w_low = w.lower()
+        if w_low not in fillers and not w_low.isdigit():
+            filtered_words.append(w)
+            
+    # Take first 5 descriptive keywords
+    short_query = " ".join(filtered_words[:5])
+    return short_query if short_query else " ".join(words[:5])
+
 def fetch_web_image(prompt: str, output_path: Path) -> dict:
     """
     Search for a matching image on the web using Tavily image search,
@@ -121,9 +177,10 @@ def fetch_web_image(prompt: str, output_path: Path) -> dict:
     Raises:
         Exception: if search returns no images or download fails.
     """
-    logger.info(f"Searching web for image matching prompt: {prompt}")
+    search_query = clean_and_shorten_query(prompt)
+    logger.info(f"Searching web for image matching query: '{search_query}' (original: '{prompt}')")
     # Run image search
-    results = search_images_tavily(prompt, max_results=5)
+    results = search_images_tavily(search_query, max_results=5)
     if not results:
         raise ValueError(f"No web images found for prompt: '{prompt}'")
     

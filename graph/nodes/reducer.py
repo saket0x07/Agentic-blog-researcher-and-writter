@@ -5,13 +5,14 @@ from typing import List
 from pydantic import BaseModel, Field
 from blog_agent.graph.state import OverallState
 from blog_agent.graph.llm import get_llm
-from blog_agent.utils.image_generator import generate_image, fetch_web_image
+from blog_agent.utils.image_generator import generate_image, fetch_web_image, generate_flux_image
 from blog_agent import config
 
 class ImagePlanItem(BaseModel):
     section_id: str = Field(description="The ID of the section (e.g., 'sec_1', 'sec_2') where the image should be placed.")
     prompt: str = Field(description="A descriptive, high-quality prompt for Google's Imagen model, focusing on modern vector art, system architecture, tech illustrations, or data flows related to the section's contents.")
     caption: str = Field(description="A brief caption to display under the image.")
+    search_query: str = Field(description="A short, concise search query (2-4 keywords) to find a relevant real-world image or diagram on the web, e.g., 'neural network diagram' or 'git branching model'.")
 
 class ImagePlan(BaseModel):
     images: List[ImagePlanItem] = Field(description="A list of up to 3 image plans. Do not plan more than 3 images.")
@@ -58,6 +59,7 @@ def reducer_node(state: OverallState):
             section_id: str
             prompt: str
             caption: str
+            search_query: str = ""
             mode: str = "generate"
         planned_images = [PlannedImageChoice(**choice) for choice in image_choices]
     else:
@@ -67,7 +69,7 @@ def reducer_node(state: OverallState):
             "and determine up to 3 ideal sections to embed visuals. You will output a list of image items, "
             "each specifying the section_id where the visual fits best, a detailed Imagen 3 generation prompt "
             "describing the style (use professional, clean tech vector illustrations, avoid realistic photos), "
-            "and a caption for the graphic."
+            "a caption for the graphic, and a short search_query (2-4 keywords) to find a relevant real-world image or diagram on the web."
         )
         user_prompt = (
             f"Blog Title: {plan['title']}\n"
@@ -125,9 +127,11 @@ def reducer_node(state: OverallState):
                 
                 try:
                     if mode == "fetch":
-                        # Fetch web image
-                        print(f"[Reducer Node] Fetching web image for section {sec_id}...")
-                        fetch_res = fetch_web_image(clean_prompt, image_path)
+                        # Fetch web image using search_query if available, otherwise fallback to clean_prompt
+                        query = getattr(img_item, "search_query", None) or clean_prompt
+                        clean_query = query.replace('\xa0', ' ').replace('\u200b', '').replace('\r', '').strip()
+                        print(f"[Reducer Node] Fetching web image for section {sec_id} with query: '{clean_query}'...")
+                        fetch_res = fetch_web_image(clean_query, image_path)
                         saved_path = fetch_res["image_path"]
                         source_url = fetch_res["source_url"]
                         
@@ -140,8 +144,21 @@ def reducer_node(state: OverallState):
                         
                         # Add to markdown with original source page link
                         image_markdown = f"\n![{img_item.caption}]({relative_path})\n*Figure: {img_item.caption}. [Source Link]({source_url})*\n\n"
+                    elif mode == "flux":
+                        # Generate image using Hugging Face FLUX directly
+                        print(f"[Reducer Node] Generating FLUX image for section {sec_id}...")
+                        saved_path = generate_flux_image(clean_prompt, image_path)
+                        img_meta["image_path"] = str(saved_path)
+                        img_meta["success"] = True
+                        
+                        relative_path = f"output/images/{image_filename}"
+                        local_images.append(str(saved_path))
+                        
+                        # Add to markdown
+                        image_markdown = f"\n![{img_item.caption}]({relative_path})\n*Figure: {img_item.caption}*\n\n"
                     else:
-                        # Run normal image generator fallbacks
+                        # Run normal image generator fallbacks (Gemini -> FLUX -> Pillow)
+                        print(f"[Reducer Node] Generating image (Gemini/fallback) for section {sec_id}...")
                         saved_path = generate_image(clean_prompt, image_path)
                         img_meta["image_path"] = str(saved_path)
                         img_meta["success"] = True
@@ -180,5 +197,6 @@ def reducer_node(state: OverallState):
     return {
         "final_blog": blog_final_markdown,
         "images": local_images,
-        "image_prompts": local_image_prompts
+        "image_prompts": local_image_prompts,
+        "file_path": str(final_blog_path)
     }
