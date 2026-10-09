@@ -36,38 +36,46 @@ You can open and explore the full interactive SVG dashboard directly in your bro
 
 ## 📊 End-to-End System Workflow
 
-Below is the live GitHub-rendered workflow diagram demonstrating the complete implementation:
+Click the diagram below to open the **full-screen interactive simulator**:
+
+<p align="center">
+  <a href="docs/interactive_flow.html" title="Click to open interactive visualizer">
+    <img src="docs/architecture_diagram.svg" alt="Agentic Blog Researcher and Writer - Architecture and Workflow" width="100%" />
+  </a>
+</p>
+
+<details>
+<summary><b>🔍 Click to expand Mermaid Flowchart Specification</b></summary>
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#1e293b', 'primaryTextColor': '#f8fafc', 'primaryBorderColor': '#6366f1', 'lineColor': '#38bdf8', 'secondaryColor': '#0f172a', 'tertiaryColor': '#1e293b'}}}%%
 flowchart TD
-    subgraph S1["1. Client & Delivery Layer"]
+    subgraph S1["1. Client and Delivery Layer"]
         UI["🖥️ Streamlit Web App<br/>(app.py : Port 8501)"]
         API["⚡ FastAPI REST API<br/>(api.py : Port 8000)"]
         DOCKER["🐳 Docker Container<br/>(AWS EC2 t2.micro + 2GB Swap)"]
     end
 
-    subgraph S2["2. Phase 1: Planning & Dynamic Research"]
+    subgraph S2["2. Phase 1: Planning and Research"]
         STATE["📦 OverallState Initializer<br/>(blog_agent/graph/state.py)"]
-        ROUTER{"🧭 Smart Router Node<br/>(nodes/router.py)<br/>closed_book | open_book | hybrid"}
-        RESEARCH["🔍 Dynamic Research Node<br/>(nodes/research.py)<br/>Generates 3-10 Search Queries"]
-        TAVILY[("🌐 Tavily Search Engine<br/>utils/tavily_client.py<br/>(w/ Mock Search Fallback)")]
-        PLANNER["📋 Structured Planner Node<br/>(nodes/planner.py)<br/>Outputs Pydantic PlanObject"]
+        ROUTER{"🧭 Smart Router Node<br/>(nodes/router.py)"}
+        RESEARCH["🔍 Dynamic Research Node<br/>(nodes/research.py)<br/>3-10 Search Queries"]
+        TAVILY[("🌐 Tavily Search Engine<br/>utils/tavily_client.py")]
+        PLANNER["📋 Structured Planner Node<br/>(nodes/planner.py)<br/>PlanObject Schema"]
     end
 
-    subgraph S3["3. Phase 2: Parallel Content Execution"]
-        FANOUT{"⚡ Dynamic Map-Reduce Fan-Out<br/>(LangGraph Send API)"}
-        W1["✍️ Worker 1: Intro & Context<br/>(nodes/worker.py)"]
-        W2["✍️ Worker 2: Core Architecture<br/>(nodes/worker.py)"]
-        W3["✍️ Worker 3: Implementation Code<br/>(nodes/worker.py)"]
-        W4["✍️ Worker 4: Best Practices & Outlook<br/>(nodes/worker.py)"]
-        TRACKER["💰 TokenUsageCallbackHandler<br/>Tracks prompt, completion tokens & USD cost"]
+    subgraph S3["3. Phase 2: Parallel Execution"]
+        FANOUT{"⚡ Dynamic Map-Reduce Fan-Out"}
+        W1["✍️ Worker 1: Intro and Context"]
+        W2["✍️ Worker 2: Core Architecture"]
+        W3["✍️ Worker 3: Implementation Code"]
+        W4["✍️ Worker 4: Best Practices"]
+        TRACKER["💰 TokenUsageCallbackHandler<br/>Tracks USD Cost and Tokens"]
     end
 
-    subgraph S4["4. Synthesis, Multimodal Generation & Storage"]
-        REDUCER["🧩 Multimodal Reducer Node<br/>(nodes/reducer.py)<br/>Stitches Drafts & Plans Images"]
-        IMAGES[("🎨 Multimodal Image Generator<br/>Gemini Imagen 3 | FLUX | Pillow Fallback")]
-        MARKDOWN["📄 Output Blog Artifact<br/>(output/topic_name.md)"]
+    subgraph S4["4. Synthesis and Multimodal"]
+        REDUCER["🧩 Multimodal Reducer Node<br/>(nodes/reducer.py)"]
+        IMAGES[("🎨 Multimodal Image Generator<br/>Gemini Imagen 3 / FLUX / Pillow")]
+        MARKDOWN["📄 Output Blog Artifact<br/>(output/topic.md)"]
     end
 
     %% Client Interactions
@@ -78,29 +86,29 @@ flowchart TD
 
     %% Phase 1 Connections
     STATE --> ROUTER
-    ROUTER -->|"open_book / hybrid"| RESEARCH
-    ROUTER -->|"closed_book (skip search)"| PLANNER
+    ROUTER -->|"open_book or hybrid"| RESEARCH
+    ROUTER -->|"closed_book"| PLANNER
     RESEARCH <-->|HTTP / Mock| TAVILY
-    RESEARCH -->|Evidence Pack| PLANNER
+    RESEARCH -->|"Evidence Pack"| PLANNER
 
     %% Phase 2 Connections
-    PLANNER -->|tasks: List[TaskObject]| FANOUT
-    FANOUT -->|Send()| W1
-    FANOUT -->|Send()| W2
-    FANOUT -->|Send()| W3
-    FANOUT -->|Send()| W4
+    PLANNER -->|"Plan Tasks"| FANOUT
+    FANOUT -->|Parallel Send| W1
+    FANOUT -->|Parallel Send| W2
+    FANOUT -->|Parallel Send| W3
+    FANOUT -->|Parallel Send| W4
     W1 -.->|Metrics| TRACKER
     W2 -.->|Metrics| TRACKER
     W3 -.->|Metrics| TRACKER
     W4 -.->|Metrics| TRACKER
 
     %% Phase 3 Connections
-    W1 -->|section_drafts| REDUCER
-    W2 -->|section_drafts| REDUCER
-    W3 -->|section_drafts| REDUCER
-    W4 -->|section_drafts| REDUCER
-    REDUCER -->|ImagePlan (max 3)| IMAGES
-    IMAGES -->|Saved PNGs| REDUCER
+    W1 -->|Section Draft| REDUCER
+    W2 -->|Section Draft| REDUCER
+    W3 -->|Section Draft| REDUCER
+    W4 -->|Section Draft| REDUCER
+    REDUCER -->|"ImagePlan - Max 3"| IMAGES
+    IMAGES -->|Saved Images| REDUCER
     REDUCER -->|Compiled Markdown| MARKDOWN
 
     %% Styling
@@ -116,6 +124,8 @@ flowchart TD
     class W1,W2,W3,W4,FANOUT worker;
     class MARKDOWN output;
 ```
+
+</details>
 
 ---
 
