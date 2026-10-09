@@ -1,0 +1,26 @@
+# Virtual environments
+myenv/
+venv/
+.venv/
+env/
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Git & IDE configs
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Environment files with sensitive credentials (passed via runtime flags/env instead)
+.env
+*.env
+
+# Local test outputs and logs
+output/
+*.log

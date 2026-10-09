@@ -6,6 +6,7 @@ __pycache__/
 # Environments
 .env
 .env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -17,3 +18,10 @@ output/
 # IDE files
 .vscode/
 .idea/
+
+# Security, Credentials & SSH Keys
+*.pem
+*.key
+*.cer
+*.crt
+*.pub

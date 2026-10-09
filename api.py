@@ -47,10 +47,21 @@ class TokenUsageCallbackHandler(BaseCallbackHandler):
         except Exception:
             pass
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="FX LangGraph API",
     description="API for the LangGraph-based Blog Agent",
     version="1.0.0"
+)
+
+# Enable CORS for cross-origin frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 class BlogWriteRequest(BaseModel):
