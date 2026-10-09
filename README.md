@@ -15,9 +15,10 @@
 This project includes an **interactive system architecture and workflow visualizer** built using [Archify](https://github.com/tt-a1i/archify) design standards.
 
 ### 🌟 Try the Standalone Interactive Visual
-You can open and explore the full interactive SVG dashboard directly in your browser:
+You can explore the full interactive dashboard live in your browser:
 
-👉 **[Open Interactive Architecture Diagram (`docs/interactive_flow.html`)](docs/interactive_flow.html)**
+👉 **[🚀 Launch Live Interactive Architecture Simulator (GitHub Pages)](https://saket0x07.github.io/Agentic-blog-researcher-and-writter/)**  
+*(Alternative mirror: [Instant Web Preview](https://htmlpreview.github.io/?https://github.com/saket0x07/Agentic-blog-researcher-and-writter/blob/main/docs/index.html))*
 
 **Features of the Interactive Diagram:**
 - 🔍 **Click-to-Inspect**: Click any node to open the inspector showing exact source files, input/output states, and code snippets.
@@ -36,10 +37,10 @@ You can open and explore the full interactive SVG dashboard directly in your bro
 
 ## 📊 End-to-End System Workflow
 
-Click the diagram below to open the **full-screen interactive simulator**:
+Click the diagram below to launch the **interactive simulator directly in your browser**:
 
 <p align="center">
-  <a href="docs/interactive_flow.html" title="Click to open interactive visualizer">
+  <a href="https://saket0x07.github.io/Agentic-blog-researcher-and-writter/" title="Click to open interactive visualizer">
     <img src="docs/architecture_diagram.svg" alt="Agentic Blog Researcher and Writer - Architecture and Workflow" width="100%" />
   </a>
 </p>
