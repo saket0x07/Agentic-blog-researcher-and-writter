@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Archify 3.0.1 (Architecture & Workflow Visualizer)">
+  <title>Agentic Blog Researcher & Writer — Interactive System Architecture & Workflow</title>
+  <style>
+    :root {
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: #1f2937;
+      --bg-hover: #374151;
+      --border-color: #374151;
+      --border-accent: #6366f1;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+      --accent-blue: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-purple: #c084fc;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #fb7185;
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #f1f5f9;
+      --bg-hover: #e2e8f0;
+      --border-color: #cbd5e1;
+      --border-accent: #4f46e5;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #94a3b8;
+      --accent-blue: #0284c7;
+      --accent-indigo: #4f46e5;
+      --accent-purple: #9333ea;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-rose: #e11d48;
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* TOP HEADER & TOOLBAR */
+    header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-accent);
+    }
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+      border-color: #6366f1;
+    }
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+
+    /* FILTER TABS */
+    .filter-group {
+      display: flex;
+      background: var(--bg-primary);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .filter-tab {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      transition: all 0.15s;
+    }
+    .filter-tab.active {
+      color: var(--text-main);
+      background: var(--bg-card);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* SEARCH INPUT */
+    .search-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      width: 170px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box:focus {
+      border-color: var(--accent-indigo);
+    }
+
+    /* MAIN WORKSPACE */
+    .viewport-container {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+      background-image: 
+        radial-gradient(var(--border-color) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    svg#canvas {
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      touch-action: none;
+    }
+    svg#canvas:active {
+      cursor: grabbing;
+    }
+
+    /* FLOATING CONTROLS */
+    .floating-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+
+    /* SIMULATION BAR */
+    .simulation-bar {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .sim-step-badge {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent-indigo);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      font-family: var(--font-mono);
+    }
+
+    /* INSPECTOR DRAWER */
+    .inspector-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 380px;
+      height: 100%;
+      background: var(--bg-secondary);
+      border-left: 1px solid var(--border-color);
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -10px 0 25px rgba(0,0,0,0.3);
+    }
+    .inspector-panel.open {
+      transform: translateX(0);
+    }
+    .inspector-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .inspector-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .inspector-close {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .inspector-close:hover {
+      color: var(--text-main);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .badge-node { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+    .badge-router { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+    .badge-worker { background: rgba(192, 132, 252, 0.15); color: var(--accent-purple); }
+    .badge-client { background: rgba(52, 211, 153, 0.15); color: var(--accent-emerald); }
+
+    .meta-row {
+      margin-bottom: 14px;
+    }
+    .meta-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .meta-value {
+      font-size: 13px;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+      background: var(--bg-card);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      word-break: break-all;
+    }
+    .code-block {
+      background: #050811;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    /* SVG DIAGRAM STYLES */
+    .boundary-box {
+      fill: var(--bg-secondary);
+      fill-opacity: 0.5;
+      stroke: var(--border-color);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 4;
+      rx: 12;
+      ry: 12;
+    }
+    .boundary-title {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 700;
+      fill: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .node-group {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .node-group:hover .node-rect {
+      stroke-width: 2.5;
+      filter: drop-shadow(0 6px 12px rgba(99, 102, 241, 0.35));
+    }
+    .node-rect {
+      rx: 10;
+      ry: 10;
+      stroke-width: 1.5;
+      transition: all 0.2s ease;
+    }
+    .node-title {
+      font-family: var(--font-sans);
+      font-size: 14px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .node-desc {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      pointer-events: none;
+    }
+    .node-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .edge-path {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: stroke 0.3s, stroke-width 0.3s;
+    }
+    .edge-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      fill: var(--text-muted);
+      text-anchor: middle;
+      background: var(--bg-primary);
+    }
+    .animated-pulse {
+      stroke-dasharray: 6 6;
+      animation: dash 1s linear infinite;
+    }
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+
+    /* HIGHLIGHT STATE */
+    .dimmed {
+      opacity: 0.25 !important;
+      filter: grayscale(80%);
+    }
+    .highlighted .node-rect {
+      stroke: #38bdf8 !important;
+      stroke-width: 3 !important;
+      filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.6)) !important;
+    }
+    .highlighted-edge {
+      stroke: #38bdf8 !important;
+      stroke-width: 3.5 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">FX</div>
+      <div>
+        <div class="brand-title">Agentic Blog Researcher & Writer</div>
+        <div class="brand-subtitle">Archify System Architecture & Workflow Map (LangGraph 2-Phase Engine)</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-group">
+        <button class="filter-tab active" onclick="setLens('all')">All Subsystems</button>
+        <button class="filter-tab" onclick="setLens('langgraph')">LangGraph Core</button>
+        <button class="filter-tab" onclick="setLens('parallel')">Worker Fan-Out</button>
+        <button class="filter-tab" onclick="setLens('apis')">Clients & Deploy</button>
+      </div>
+
+      <input type="text" id="searchInput" class="search-box" placeholder="Search node or file..." onkeyup="filterNodes(this.value)">
+
+      <button class="btn" onclick="toggleTheme()" id="themeBtn" title="Toggle Dark/Light Mode">🌙 Theme</button>
+      <button class="btn btn-primary" onclick="toggleSimulation()" id="simBtn">▶ Run Flow Simulator</button>
+      <button class="btn" onclick="exportSVG()" title="Export Diagram as Vector SVG">📥 Export SVG</button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE -->
+  <div class="viewport-container">
+
+    <!-- SIMULATION STATUS OVERLAY -->
+    <div class="simulation-bar" id="simBar" style="display: none;">
+      <span class="sim-step-badge" id="simBadge">STEP 1/6</span>
+      <span id="simDesc" style="font-size: 13px; font-weight: 600;">Router Classifies Knowledge Mode</span>
+      <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="nextSimStep()">Next ⏭</button>
+      <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="stopSimulation()">Stop ⏹</button>
+    </div>
+
+    <!-- CANVAS SVG -->
+    <svg id="canvas" viewBox="0 0 1480 880">
+      <defs>
+        <!-- Marker Arrows -->
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#6366f1"/>
+        </marker>
+        <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#34d399"/>
+        </marker>
+        <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fbbf24"/>
+        </marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#c084fc"/>
+        </marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#38bdf8"/>
+        </marker>
+      </defs>
+
+      <g id="viewport-transform">
+
+        <!-- ================= BOUNDARIES ================= -->
+        <!-- 1. Client / Delivery Boundary -->
+        <rect class="boundary-box" x="40" y="40" width="280" height="780"/>
+        <text class="boundary-title" x="60" y="70">1. Client & API Interfaces</text>
+
+        <!-- 2. Phase 1: Planning & Research Boundary -->
+        <rect class="boundary-box" x="360" y="40" width="340" height="780"/>
+        <text class="boundary-title" x="380" y="70">2. Phase 1: Planning Core</text>
+
+        <!-- 3. Phase 2: Parallel Execution Boundary -->
+        <rect class="boundary-box" x="740" y="40" width="370" height="780"/>
+        <text class="boundary-title" x="760" y="70">3. Phase 2: Parallel Workers</text>
+
+        <!-- 4. Synthesis & Output Boundary -->
+        <rect class="boundary-box" x="1150" y="40" width="290" height="780"/>
+        <text class="boundary-title" x="1170" y="70">4. Synthesis & Persistence</text>
+
+
+        <!-- ================= EDGES (CONNECTIONS) ================= -->
+        <!-- Client -> State / Start -->
+        <path id="edge-streamlit-router" class="edge-path" stroke="#34d399" marker-end="url(#arrow-emerald)" d="M 270 160 L 320 160 L 320 230 L 410 230"/>
+        <path id="edge-fastapi-router" class="edge-path" stroke="#34d399" marker-end="url(#arrow-emerald)" d="M 270 330 L 320 330 L 320 250 L 410 250"/>
+
+        <!-- Router -> Research (Conditional if open_book or hybrid) -->
+        <path id="edge-router-research" class="edge-path" stroke="#fbbf24" marker-end="url(#arrow-amber)" d="M 530 290 L 530 380"/>
+        <text class="edge-label" x="590" y="340">open_book / hybrid</text>
+
+        <!-- Router -> Planner (Short-circuit if closed_book) -->
+        <path id="edge-router-planner" class="edge-path" stroke="#9ca3af" stroke-dasharray="4 4" marker-end="url(#arrow)" d="M 430 290 L 430 570 L 450 570"/>
+        <text class="edge-label" x="390" y="430">closed_book</text>
+
+        <!-- Research -> Planner (Evidence Pack) -->
+        <path id="edge-research-planner" class="edge-path" stroke="#38bdf8" marker-end="url(#arrow-blue)" d="M 530 470 L 530 540"/>
+        <text class="edge-label" x="595" y="508">EvidencePack</text>
+
+        <!-- External Tavily -> Research Node -->
+        <path id="edge-tavily-research" class="edge-path" stroke="#6366f1" stroke-dasharray="3 3" marker-end="url(#arrow)" d="M 530 730 L 530 630 L 580 630 L 580 470"/>
+
+        <!-- Planner -> Fan-Out Map -->
+        <path id="edge-planner-fanout" class="edge-path" stroke="#818cf8" marker-end="url(#arrow)" d="M 650 585 L 755 585"/>
+        <text class="edge-label" x="700" y="575">Plan.tasks[]</text>
+
+        <!-- Fan-out -> Worker 1, 2, 3, 4 -->
+        <path id="edge-fanout-w1" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 785 550 L 785 160 L 820 160"/>
+        <path id="edge-fanout-w2" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 785 550 L 785 300 L 820 300"/>
+        <path id="edge-fanout-w3" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 785 585 L 820 585"/>
+        <path id="edge-fanout-w4" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 785 620 L 785 720 L 820 720"/>
+
+        <!-- Workers -> Reducer (Fan-in) -->
+        <path id="edge-w1-reducer" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 1060 160 L 1100 160 L 1100 370 L 1180 370"/>
+        <path id="edge-w2-reducer" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 1060 300 L 1100 300 L 1100 390 L 1180 390"/>
+        <path id="edge-w3-reducer" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 1060 585 L 1100 585 L 1100 430 L 1180 430"/>
+        <path id="edge-w4-reducer" class="edge-path" stroke="#c084fc" marker-end="url(#arrow-purple)" d="M 1060 720 L 1100 720 L 1100 450 L 1180 450"/>
+
+        <!-- Reducer -> Gemini / FLUX -->
+        <path id="edge-reducer-images" class="edge-path" stroke="#fb7185" marker-end="url(#arrow)" d="M 1300 470 L 1300 550"/>
+        <text class="edge-label" x="1355" y="515">ImagePlan (<=3)</text>
+
+        <!-- Reducer -> Output Markdown -->
+        <path id="edge-reducer-output" class="edge-path" stroke="#34d399" marker-end="url(#arrow-emerald)" d="M 1300 350 L 1300 230"/>
+        <text class="edge-label" x="1350" y="280">final_blog.md</text>
+
+
+        <!-- ================= NODES ================= -->
+
+        <!-- CLIENT 1: STREAMLIT UI -->
+        <g id="node-streamlit" class="node-group" onclick="selectNode('streamlit')" data-lens="apis">
+          <rect class="node-rect" x="70" y="110" width="200" height="90" fill="#1e293b" stroke="#34d399"/>
+          <text class="node-pill" x="85" y="132" fill="#34d399">PORT 8501 • FRONTEND</text>
+          <text class="node-title" x="85" y="155" fill="#f8fafc">Streamlit Dashboard</text>
+          <text class="node-desc" x="85" y="175" fill="#94a3b8">Interactive execution & UI</text>
+          <text class="node-desc" x="85" y="190" fill="#64748b">app.py</text>
+        </g>
+
+        <!-- CLIENT 2: FASTAPI BACKEND -->
+        <g id="node-fastapi" class="node-group" onclick="selectNode('fastapi')" data-lens="apis">
+          <rect class="node-rect" x="70" y="270" width="200" height="90" fill="#1e293b" stroke="#34d399"/>
+          <text class="node-pill" x="85" y="292" fill="#34d399">PORT 8000 • REST API</text>
+          <text class="node-title" x="85" y="315" fill="#f8fafc">FastAPI Endpoints</text>
+          <text class="node-desc" x="85" y="335" fill="#94a3b8">/blog/write & /generate</text>
+          <text class="node-desc" x="85" y="350" fill="#64748b">api.py (CORS Enabled)</text>
+        </g>
+
+        <!-- DOCKER CONTAINER & EC2 -->
+        <g id="node-docker" class="node-group" onclick="selectNode('docker')" data-lens="apis">
+          <rect class="node-rect" x="70" y="440" width="200" height="110" fill="#0f172a" stroke="#38bdf8"/>
+          <text class="node-pill" x="85" y="462" fill="#38bdf8">DEPLOYMENT INFRA</text>
+          <text class="node-title" x="85" y="485" fill="#f8fafc">Docker & AWS EC2</text>
+          <text class="node-desc" x="85" y="505" fill="#94a3b8">t2.micro (1GB + 2GB Swap)</text>
+          <text class="node-desc" x="85" y="525" fill="#94a3b8">saket0x07/blog-agent:latest</text>
+          <text class="node-desc" x="85" y="540" fill="#64748b">Dockerfile • DEPLOYMENT_GUIDE.md</text>
+        </g>
+
+        <!-- STATE INITIALIZER -->
+        <g id="node-state" class="node-group" onclick="selectNode('state')" data-lens="langgraph">
+          <rect class="node-rect" x="70" y="630" width="200" height="80" fill="#1e293b" stroke="#818cf8"/>
+          <text class="node-pill" x="85" y="652" fill="#818cf8">TYPED GRAPH STATE</text>
+          <text class="node-title" x="85" y="675" fill="#f8fafc">OverallState Schema</text>
+          <text class="node-desc" x="85" y="695" fill="#94a3b8">Pydantic & TypedDict</text>
+          <text class="node-desc" x="85" y="707" fill="#64748b">blog_agent/graph/state.py</text>
+        </g>
+
+
+        <!-- NODE 1: ROUTER -->
+        <g id="node-router" class="node-group" onclick="selectNode('router')" data-lens="langgraph">
+          <rect class="node-rect" x="410" y="200" width="240" height="90" fill="#1e293b" stroke="#fbbf24"/>
+          <text class="node-pill" x="425" y="222" fill="#fbbf24">LANGGRAPH NODE 1</text>
+          <text class="node-title" x="425" y="245" fill="#f8fafc">Smart Router Node</text>
+          <text class="node-desc" x="425" y="265" fill="#94a3b8">Classifies: closed/open/hybrid</text>
+          <text class="node-desc" x="425" y="280" fill="#64748b">nodes/router.py</text>
+        </g>
+
+        <!-- NODE 2: RESEARCH -->
+        <g id="node-research" class="node-group" onclick="selectNode('research')" data-lens="langgraph">
+          <rect class="node-rect" x="410" y="380" width="240" height="90" fill="#1e293b" stroke="#38bdf8"/>
+          <text class="node-pill" x="425" y="402" fill="#38bdf8">LANGGRAPH NODE 2</text>
+          <text class="node-title" x="425" y="425" fill="#f8fafc">Dynamic Research Node</text>
+          <text class="node-desc" x="425" y="445" fill="#94a3b8">3–10 Queries -> EvidencePack</text>
+          <text class="node-desc" x="425" y="460" fill="#64748b">nodes/research.py</text>
+        </g>
+
+        <!-- TAVILY SEARCH ENGINE -->
+        <g id="node-tavily" class="node-group" onclick="selectNode('tavily')" data-lens="langgraph">
+          <rect class="node-rect" x="410" y="730" width="240" height="70" fill="#0f172a" stroke="#6366f1"/>
+          <text class="node-pill" x="425" y="750" fill="#6366f1">EXTERNAL RESEARCH API</text>
+          <text class="node-title" x="425" y="770" fill="#f8fafc">Tavily Search API</text>
+          <text class="node-desc" x="425" y="788" fill="#94a3b8">tavily_client.py (w/ Mock Fallback)</text>
+        </g>
+
+        <!-- NODE 3: PLANNER -->
+        <g id="node-planner" class="node-group" onclick="selectNode('planner')" data-lens="langgraph">
+          <rect class="node-rect" x="410" y="540" width="240" height="90" fill="#1e293b" stroke="#818cf8"/>
+          <text class="node-pill" x="425" y="562" fill="#818cf8">LANGGRAPH NODE 3</text>
+          <text class="node-title" x="425" y="585" fill="#f8fafc">Structured Planner Node</text>
+          <text class="node-desc" x="425" y="605" fill="#94a3b8">Generates Pydantic PlanObject</text>
+          <text class="node-desc" x="425" y="620" fill="#64748b">nodes/planner.py</text>
+        </g>
+
+
+        <!-- FAN-OUT NODE -->
+        <g id="node-fanout" class="node-group" onclick="selectNode('fanout')" data-lens="parallel">
+          <rect class="node-rect" x="755" y="545" width="30" height="80" rx="6" fill="#818cf8" stroke="#a5b4fc"/>
+          <text x="770" y="590" fill="white" font-size="10" font-weight="bold" text-anchor="middle">FAN OUT</text>
+        </g>
+
+        <!-- WORKER 1 -->
+        <g id="node-worker1" class="node-group" onclick="selectNode('worker1')" data-lens="parallel">
+          <rect class="node-rect" x="820" y="115" width="240" height="85" fill="#1e293b" stroke="#c084fc"/>
+          <text class="node-pill" x="835" y="137" fill="#c084fc">PARALLEL WORKER 1</text>
+          <text class="node-title" x="835" y="160" fill="#f8fafc">Section: Intro & Context</text>
+          <text class="node-desc" x="835" y="180" fill="#94a3b8">Drafts section asynchronously</text>
+          <text class="node-desc" x="835" y="193" fill="#64748b">nodes/worker.py</text>
+        </g>
+
+        <!-- WORKER 2 -->
+        <g id="node-worker2" class="node-group" onclick="selectNode('worker2')" data-lens="parallel">
+          <rect class="node-rect" x="820" y="255" width="240" height="85" fill="#1e293b" stroke="#c084fc"/>
+          <text class="node-pill" x="835" y="277" fill="#c084fc">PARALLEL WORKER 2</text>
+          <text class="node-title" x="835" y="300" fill="#f8fafc">Section: Architecture & Mech</text>
+          <text class="node-desc" x="835" y="320" fill="#94a3b8">Drafts section asynchronously</text>
+          <text class="node-desc" x="835" y="333" fill="#64748b">nodes/worker.py</text>
+        </g>
+
+        <!-- WORKER 3 -->
+        <g id="node-worker3" class="node-group" onclick="selectNode('worker3')" data-lens="parallel">
+          <rect class="node-rect" x="820" y="540" width="240" height="85" fill="#1e293b" stroke="#c084fc"/>
+          <text class="node-pill" x="835" y="562" fill="#c084fc">PARALLEL WORKER 3</text>
+          <text class="node-title" x="835" y="585" fill="#f8fafc">Section: Practical Code</text>
+          <text class="node-desc" x="835" y="605" fill="#94a3b8">Drafts section asynchronously</text>
+          <text class="node-desc" x="835" y="618" fill="#64748b">nodes/worker.py</text>
+        </g>
+
+        <!-- WORKER 4 -->
+        <g id="node-worker4" class="node-group" onclick="selectNode('worker4')" data-lens="parallel">
+          <rect class="node-rect" x="820" y="680" width="240" height="85" fill="#1e293b" stroke="#c084fc"/>
+          <text class="node-pill" x="835" y="702" fill="#c084fc">PARALLEL WORKER 4</text>
+          <text class="node-title" x="835" y="725" fill="#f8fafc">Section: Best Practices</text>
+          <text class="node-desc" x="835" y="745" fill="#94a3b8">Drafts section asynchronously</text>
+          <text class="node-desc" x="835" y="758" fill="#64748b">nodes/worker.py</text>
+        </g>
+
+
+        <!-- NODE 4: REDUCER -->
+        <g id="node-reducer" class="node-group" onclick="selectNode('reducer')" data-lens="langgraph">
+          <rect class="node-rect" x="1180" y="350" width="230" height="120" fill="#1e293b" stroke="#fb7185"/>
+          <text class="node-pill" x="1195" y="375" fill="#fb7185">LANGGRAPH REDUCER</text>
+          <text class="node-title" x="1195" y="400" fill="#f8fafc">Multimodal Reducer</text>
+          <text class="node-desc" x="1195" y="420" fill="#94a3b8">1. Stitches SectionDrafts</text>
+          <text class="node-desc" x="1195" y="438" fill="#94a3b8">2. Plans 1-3 Images (ImagePlan)</text>
+          <text class="node-desc" x="1195" y="456" fill="#64748b">nodes/reducer.py</text>
+        </g>
+
+        <!-- OUTPUT MARKDOWN -->
+        <g id="node-markdown" class="node-group" onclick="selectNode('markdown')" data-lens="apis">
+          <rect class="node-rect" x="1180" y="140" width="230" height="90" fill="#0f172a" stroke="#34d399"/>
+          <text class="node-pill" x="1195" y="162" fill="#34d399">FINAL DELIVERABLE</text>
+          <text class="node-title" x="1195" y="185" fill="#f8fafc">Markdown Blog Artifact</text>
+          <text class="node-desc" x="1195" y="205" fill="#94a3b8">Illustrated technical article</text>
+          <text class="node-desc" x="1195" y="220" fill="#64748b">output/*.md</text>
+        </g>
+
+        <!-- IMAGE GENERATORS (MULTIMODAL) -->
+        <g id="node-images" class="node-group" onclick="selectNode('images')" data-lens="apis">
+          <rect class="node-rect" x="1180" y="550" width="230" height="150" fill="#0f172a" stroke="#fb7185"/>
+          <text class="node-pill" x="1195" y="572" fill="#fb7185">MULTIMODAL ENGINE</text>
+          <text class="node-title" x="1195" y="595" fill="#f8fafc">Visual Generation</text>
+          <text class="node-desc" x="1195" y="618" fill="#94a3b8">1. Google Gemini (Imagen 3)</text>
+          <text class="node-desc" x="1195" y="636" fill="#94a3b8">2. HuggingFace FLUX.1</text>
+          <text class="node-desc" x="1195" y="654" fill="#94a3b8">3. Pillow Local Fallback</text>
+          <text class="node-desc" x="1195" y="682" fill="#64748b">utils/image_generator.py</text>
+        </g>
+
+      </g>
+    </svg>
+
+    <!-- FLOATING ZOOM / PAN CONTROLS -->
+    <div class="floating-controls">
+      <button class="btn" style="padding: 6px 10px;" onclick="zoomIn()" title="Zoom In">➕</button>
+      <button class="btn" style="padding: 6px 10px;" onclick="zoomOut()" title="Zoom Out">➖</button>
+      <button class="btn" style="padding: 6px 10px;" onclick="resetTransform()" title="Reset View">🎯 Reset</button>
+    </div>
+
+    <!-- INSPECTOR DRAWER -->
+    <div class="inspector-panel" id="inspector">
+      <div class="inspector-header">
+        <span class="brand-title" id="inspTitle">Node Inspector</span>
+        <button class="inspector-close" onclick="closeInspector()">✕</button>
+      </div>
+      <div class="inspector-body">
+        <div id="inspBadge" class="badge badge-node">LANGGRAPH NODE</div>
+        <h3 id="inspHeading" style="font-size: 18px; margin-bottom: 8px;">Router Node</h3>
+        <p id="inspDesc" style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+          Inspects the user topic prompt and classifies it into closed_book, open_book, or hybrid knowledge requirements.
+        </p>
+
+        <div class="meta-row">
+          <div class="meta-label">Source File Reference</div>
+          <div class="meta-value" id="inspFile">blog_agent/graph/nodes/router.py</div>
+        </div>
+
+        <div class="meta-row">
+          <div class="meta-label">Input State Keys</div>
+          <div class="meta-value" id="inspInput">state["topic"]</div>
+        </div>
+
+        <div class="meta-row">
+          <div class="meta-label">Output State Mutations</div>
+          <div class="meta-value" id="inspOutput">state["knowledge_category"]</div>
+        </div>
+
+        <div class="meta-row">
+          <div class="meta-label">Runtime Behavior / Implementation</div>
+          <div class="code-block" id="inspCode"># Sample code</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // NODE DATABASE FOR INSPECTION
+    const nodeData = {
+      streamlit: {
+        badge: "CLIENT UI • FRONTEND",
+        badgeClass: "badge-client",
+        title: "Streamlit Web Dashboard",
+        desc: "Provides interactive single-page GUI with real-time graph progress, collapsible plan reviews, inline image previews, and markdown exports.",
+        file: "app.py (Lines 1-516)",
+        input: 'st.text_input("Enter Topic")',
+        output: 'blog_agent_graph.invoke() or .stream() updates',
+        code: `st.set_page_config(page_title="Automated Content Planner & Writer", layout="wide")\n\n# Invokes workflow:\nfor event in blog_agent_graph.stream({"topic": topic}):\n    update_ui(event)`
+      },
+      fastapi: {
+        badge: "REST API • BACKEND",
+        badgeClass: "badge-client",
+        title: "FastAPI REST Server",
+        desc: "High-performance backend API serving programmatic requests, supporting cross-origin requests via CORSMiddleware, and tracking tokens/costs per node.",
+        file: "api.py (Lines 50-180)",
+        input: '{"topic": "Quantum Computing"}',
+        output: '{"status": "completed", "final_blog": "...", "word_count": 1420}',
+        code: `@app.post("/blog/write")\ndef write_blog(request: BlogWriteRequest):\n    result = blog_agent_graph.invoke({"topic": request.topic})\n    return result`
+      },
+      docker: {
+        badge: "INFRASTRUCTURE",
+        badgeClass: "badge-client",
+        title: "Docker & AWS EC2 Container",
+        desc: "Packaged as a lightweight container based on python:3.11-slim, deployed to AWS EC2 t2.micro Free Tier with 2GB swap space and persistent volume mounts.",
+        file: "Dockerfile & DEPLOYMENT_GUIDE.md",
+        input: "Docker build context, .env API keys",
+        output: "Listening on ports 8501 (Streamlit) & 8000 (FastAPI)",
+        code: `docker run -d --name fx-agent -p 8501:8501 --env-file .env saket0x07/blog-agent:latest`
+      },
+      state: {
+        badge: "PYDANTIC SCHEMA",
+        badgeClass: "badge-node",
+        title: "OverallState Schema",
+        desc: "Central TypedDict state passed between all LangGraph nodes. Uses operator.add for section drafts map-reduce aggregation.",
+        file: "blog_agent/graph/state.py",
+        input: "topic: str",
+        output: "OverallState dictionary",
+        code: `class OverallState(TypedDict):\n    topic: str\n    knowledge_category: str\n    search_queries: List[str]\n    evidence: List[Dict[str, Any]]\n    plan: Dict[str, Any]\n    section_drafts: Annotated[List[Dict[str, Any]], operator.add]\n    final_blog: str`
+      },
+      router: {
+        badge: "LANGGRAPH NODE",
+        badgeClass: "badge-router",
+        title: "Smart Router Node",
+        desc: "Classifies the topic into 'closed_book' (static concepts), 'open_book' (rapidly changing topics), or 'hybrid' (concepts needing fresh stats). If closed_book, skips web search.",
+        file: "blog_agent/graph/nodes/router.py",
+        input: 'state["topic"]',
+        output: 'state["knowledge_category"]',
+        code: `def router_node(state: OverallState):\n    llm = get_llm()\n    # Classifies query to closed_book, open_book, or hybrid\n    return {"knowledge_category": result.category}`
+      },
+      research: {
+        badge: "LANGGRAPH NODE",
+        badgeClass: "badge-node",
+        title: "Dynamic Research Node",
+        desc: "Formulates 3 to 10 distinct, highly targeted Tavily web queries. Collects snippets, dates, and URLs into an Evidence Pack passed to the Planner.",
+        file: "blog_agent/graph/nodes/research.py",
+        input: 'state["topic"], state["knowledge_category"]',
+        output: 'state["evidence"], state["search_queries"]',
+        code: `queries = generate_search_queries(topic)\nevidence = search_tavily(queries)\nreturn {"search_queries": queries, "evidence": evidence}`
+      },
+      tavily: {
+        badge: "EXTERNAL TOOL",
+        badgeClass: "badge-node",
+        title: "Tavily Search Engine Client",
+        desc: "Wrapper around the Tavily Python SDK. Features an automatic local Mock fallback so users can test the entire pipeline without API keys.",
+        file: "blog_agent/utils/tavily_client.py",
+        input: "search_queries: List[str]",
+        output: "List[EvidenceItem] (title, url, snippet, date)",
+        code: `client = TavilyClient(api_key=TAVILY_API_KEY)\nresponse = client.search(query=q, max_results=3)`
+      },
+      planner: {
+        badge: "LANGGRAPH NODE",
+        badgeClass: "badge-node",
+        title: "Structured Planner Node",
+        desc: "Analyzes the topic and Evidence Pack, producing a structured Pydantic PlanObject with audience, tone, and specific section TaskObjects.",
+        file: "blog_agent/graph/nodes/planner.py",
+        input: 'state["topic"], state["evidence"]',
+        output: 'state["plan"] (Pydantic PlanObject)',
+        code: `structured_llm = llm.with_structured_output(PlanObject)\nplan = structured_llm.invoke(prompt)\nreturn {"plan": plan.model_dump()}`
+      },
+      fanout: {
+        badge: "LANGGRAPH FAN-OUT",
+        badgeClass: "badge-worker",
+        title: "Dynamic Worker Fan-Out Edge",
+        desc: "Splits the plan tasks into concurrent LangGraph Send() calls. Each task is executed in parallel by an independent Worker Node.",
+        file: "blog_agent/graph/workflow.py (map_tasks_to_workers)",
+        input: 'state["plan"]["tasks"]',
+        output: 'List[Send("worker", task_state)]',
+        code: `for task in plan["tasks"]:\n    sends.append(Send("worker", {"task": task, "evidence": state["evidence"]}))\nreturn sends`
+      },
+      worker1: {
+        badge: "PARALLEL WORKER",
+        badgeClass: "badge-worker",
+        title: "Worker Node 1: Intro & Thesis",
+        desc: "Writes the introduction and foundational context of the blog post using the assigned task instructions and evidence snippets.",
+        file: "blog_agent/graph/nodes/worker.py",
+        input: 'task: {"title": "Introduction...", "bullet_points": [...]}',
+        output: 'section_drafts: [{"task_id": "sec_1", "content": "..."}]',
+        code: `response = llm.invoke(worker_prompt)\nreturn {"section_drafts": [{"task_id": task["id"], "content": response.content}]}`
+      },
+      worker2: {
+        badge: "PARALLEL WORKER",
+        badgeClass: "badge-worker",
+        title: "Worker Node 2: Core Architecture",
+        desc: "Deep-dives into internal mechanisms, architectural diagrams, and technical breakdowns in parallel with other workers.",
+        file: "blog_agent/graph/nodes/worker.py",
+        input: 'task: {"title": "Core Mechanics...", "bullet_points": [...]}',
+        output: 'section_drafts: [{"task_id": "sec_2", "content": "..."}]',
+        code: `response = llm.invoke(worker_prompt)\nreturn {"section_drafts": [{"task_id": task["id"], "content": response.content}]}`
+      },
+      worker3: {
+        badge: "PARALLEL WORKER",
+        badgeClass: "badge-worker",
+        title: "Worker Node 3: Practical Implementation",
+        desc: "Constructs working code snippets, CLI examples, and best practice configurations concurrently.",
+        file: "blog_agent/graph/nodes/worker.py",
+        input: 'task: {"title": "Implementation Guide...", "requires_code_blocks": True}',
+        output: 'section_drafts: [{"task_id": "sec_3", "content": "..."}]',
+        code: `response = llm.invoke(worker_prompt)\nreturn {"section_drafts": [{"task_id": task["id"], "content": response.content}]}`
+      },
+      worker4: {
+        badge: "PARALLEL WORKER",
+        badgeClass: "badge-worker",
+        title: "Worker Node 4: Synthesis & Outlook",
+        desc: "Summarizes trade-offs, performance implications, and future outlook to conclude the blog.",
+        file: "blog_agent/graph/nodes/worker.py",
+        input: 'task: {"title": "Conclusion & Next Steps..."}',
+        output: 'section_drafts: [{"task_id": "sec_4", "content": "..."}]',
+        code: `response = llm.invoke(worker_prompt)\nreturn {"section_drafts": [{"task_id": task["id"], "content": response.content}]}`
+      },
+      reducer: {
+        badge: "LANGGRAPH REDUCER",
+        badgeClass: "badge-node",
+        title: "Multimodal Reducer Node",
+        desc: "Stitches all section drafts in logical sequence. Generates ImagePlan with up to 3 illustration prompts, triggers image generation, and writes final markdown.",
+        file: "blog_agent/graph/nodes/reducer.py",
+        input: 'state["section_drafts"], state["plan"]',
+        output: 'state["final_blog"], state["images"]',
+        code: `stitched_text = stitch_in_order(drafts, plan["tasks"])\nimage_plan = llm.with_structured_output(ImagePlan).invoke(prompt)\nfinal_markdown = embed_images(stitched_text, image_plan)\nreturn {"final_blog": final_markdown}`
+      },
+      markdown: {
+        badge: "DELIVERABLE",
+        badgeClass: "badge-client",
+        title: "Final Markdown Article",
+        desc: "Publication-ready Markdown file saved locally at output/<slug>.md with frontmatter, embedded images, and citations.",
+        file: "output/*.md",
+        input: "final_blog text from Reducer",
+        output: "Persisted .md file with inline images",
+        code: `with open(f"output/{topic_slug}.md", "w", encoding="utf-8") as f:\n    f.write(final_blog)`
+      },
+      images: {
+        badge: "IMAGE GENERATION",
+        badgeClass: "badge-node",
+        title: "Multimodal Visuals Engine",
+        desc: "Generates vector-style illustrations via Google Gemini Imagen 3 or Hugging Face FLUX.1. Automatically falls back to Pillow placeholders if keys are omitted.",
+        file: "blog_agent/utils/image_generator.py",
+        input: "ImagePlanItem: prompt, caption, section_id",
+        output: "Saved image path (output/images/*.png)",
+        code: `try:\n    img_path = generate_gemini_image(prompt)\nexcept:\n    img_path = generate_pillow_fallback(prompt)`
+      }
+    };
+
+    // SELECTION & INSPECTOR
+    function selectNode(id) {
+      const data = nodeData[id];
+      if (!data) return;
+
+      document.getElementById('inspBadge').innerText = data.badge;
+      document.getElementById('inspBadge').className = `badge ${data.badgeClass}`;
+      document.getElementById('inspHeading').innerText = data.title;
+      document.getElementById('inspDesc').innerText = data.desc;
+      document.getElementById('inspFile').innerText = data.file;
+      document.getElementById('inspInput').innerText = data.input;
+      document.getElementById('inspOutput').innerText = data.output;
+      document.getElementById('inspCode').innerText = data.code;
+
+      document.getElementById('inspector').classList.add('open');
+
+      // Highlight on canvas
+      document.querySelectorAll('.node-group').forEach(el => el.classList.remove('highlighted'));
+      const activeEl = document.getElementById(`node-${id}`);
+      if (activeEl) activeEl.classList.add('highlighted');
+    }
+
+    function closeInspector() {
+      document.getElementById('inspector').classList.remove('open');
+      document.querySelectorAll('.node-group').forEach(el => el.classList.remove('highlighted'));
+    }
+
+    // THEME TOGGLE
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      document.getElementById('themeBtn').innerText = next === 'dark' ? '🌙 Theme' : '☀️ Theme';
+    }
+
+    // LENS FILTERING
+    function setLens(lens) {
+      document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.querySelectorAll('.node-group').forEach(node => {
+        const nodeLens = node.getAttribute('data-lens');
+        if (lens === 'all' || nodeLens === lens) {
+          node.classList.remove('dimmed');
+        } else {
+          node.classList.add('dimmed');
+        }
+      });
+    }
+
+    // SEARCH NODES
+    function filterNodes(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.node-group').forEach(node => {
+        const text = node.textContent.toLowerCase();
+        if (!q || text.includes(q)) {
+          node.classList.remove('dimmed');
+        } else {
+          node.classList.add('dimmed');
+        }
+      });
+    }
+
+    // SIMULATION FLOW ENGINE
+    const simSteps = [
+      { node: "streamlit", desc: "User inputs topic into Streamlit GUI / API", badge: "STEP 1/6: INPUT" },
+      { node: "router", desc: "Router classifies topic requirement (closed/open/hybrid)", badge: "STEP 2/6: ROUTING" },
+      { node: "research", desc: "Dynamic Tavily research fetches 3-10 web evidence sources", badge: "STEP 3/6: EVIDENCE" },
+      { node: "planner", desc: "Planner formulates structured outline (Pydantic PlanObject)", badge: "STEP 4/6: PLANNING" },
+      { node: "worker1", desc: "Dynamic Fan-Out: Parallel workers write drafts concurrently", badge: "STEP 5/6: FAN-OUT" },
+      { node: "reducer", desc: "Reducer stitches drafts, generates images, saves final blog", badge: "STEP 6/6: REDUCE" }
+    ];
+    let simIndex = 0;
+    let simTimer = null;
+
+    function toggleSimulation() {
+      const bar = document.getElementById('simBar');
+      if (bar.style.display === 'none') {
+        bar.style.display = 'flex';
+        simIndex = 0;
+        playSimStep();
+      } else {
+        stopSimulation();
+      }
+    }
+
+    function playSimStep() {
+      if (simIndex >= simSteps.length) {
+        simIndex = 0;
+      }
+      const step = simSteps[simIndex];
+      document.getElementById('simBadge').innerText = step.badge;
+      document.getElementById('simDesc').innerText = step.desc;
+      selectNode(step.node);
+
+      // Add animated pulse
+      document.querySelectorAll('.edge-path').forEach(p => p.classList.add('animated-pulse'));
+    }
+
+    function nextSimStep() {
+      simIndex = (simIndex + 1) % simSteps.length;
+      playSimStep();
+    }
+
+    function stopSimulation() {
+      document.getElementById('simBar').style.display = 'none';
+      document.querySelectorAll('.edge-path').forEach(p => p.classList.remove('animated-pulse'));
+      closeInspector();
+    }
+
+    // PAN & ZOOM
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    const canvas = document.getElementById('canvas');
+    const transformG = document.getElementById('viewport-transform');
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.node-group')) return;
+      isPanning = true;
+      startX = e.clientX - translateX;
+      startY = e.clientY - translateY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      translateX = e.clientX - startX;
+      translateY = e.clientY - startY;
+      applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => { isPanning = false; });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      scale = Math.min(Math.max(0.4, scale * zoomFactor), 2.5);
+      applyTransform();
+    });
+
+    function applyTransform() {
+      transformG.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
+    }
+
+    function zoomIn() { scale = Math.min(2.5, scale * 1.2); applyTransform(); }
+    function zoomOut() { scale = Math.max(0.4, scale * 0.8); applyTransform(); }
+    function resetTransform() { scale = 1; translateX = 0; translateY = 0; applyTransform(); }
+
+    function exportSVG() {
+      const svgData = new XMLSerializer().serializeToString(canvas);
+      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'fx-langgraph-architecture.svg';
+      a.click();
+    }
+  </script>
+</body>
+</html>
